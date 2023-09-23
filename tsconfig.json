@@ -1,0 +1,25 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"lib": ["dom", "ESNext"],
+		"baseUrl": ".",
+		"module": "ESNext",
+		"noImplicitAny": false,
+		"noEmit": false,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"types": ["node"],
+		"paths": {
+			"~/config": ["src/config/index.ts"],
+			"~/domain/*": ["src/domain/*"],
+			"~/http/*": ["src/http/*"],
+			"~/infra/*": ["src/infra/*"],
+			"~/lib/*": ["src/lib/*"]
+		}
+	},
+	"include": ["./src/**/*"],
+	"exclude": ["node_modules"]
+}
