@@ -1,0 +1,18 @@
+Event: test:enqueue
+Event: test:dequeue
+Event: test:enqueue
+Event: test:dequeue
+test modules/add started
+test should add two number and return good result started
+test should add two number and return good result passed
+Event: test:plan
+test modules/add passed
+Event: test:plan
+Event: test:diagnostic
+Event: test:diagnostic
+Event: test:diagnostic
+Event: test:diagnostic
+Event: test:diagnostic
+Event: test:diagnostic
+Event: test:diagnostic
+Event: test:diagnostic
