@@ -1,81 +1,48 @@
-import { describe, it, mock } from 'node:test'
+import { describe, it } from 'node:test'
 import assert from 'node:assert'
 
-import http from "http";
-
 import httpClient from './'
-import {assertMockCall} from "../../tests/utils/assertMockCall";
-
-const mockedCallback = (mockData) => (event, callback) => {
-    console.log('[mockedCallback] event', event)
-
-    if (event === 'data') {
-        callback(JSON.stringify(mockData))
-    }
-    if (event === 'end') {
-        callback()
-    }
-}
+import mockHttpRequest, {OptionRequests} from "../../tests/mocks/http/request";
 
 describe('httpClient', () => {
     it('should call http.request 3 times with good parameters add aggregate response correctly', async () => {
         // Given
-        const httpRequestMocked = mock.method(http, 'request').mock;
-
-        const mockData = {
-            id: 1,
-            title: 'delectus aut autem',
-            completed: false,
-        };
-
-        httpRequestMocked.mockImplementationOnce((options, callback) => {
-            callback({
-                statusCode: 200,
-                statusMessage: 'OK',
-                on: mockedCallback(mockData)
-            })
-            return {
-                end: () => { },
-                on: (event, callback) => {
-                    if (event === 'error') {
-                        callback(new Error('Something went wrong'))
+        const optionRequests: OptionRequests = [
+            {
+                isMockOne: true,
+                mockCallIdx: 0,
+                mockData: {
+                    statusCode: 200,
+                    statusMessage: 'OK',
+                    data: {
+                        id: 1,
+                        title: 'delectus aut autem',
+                        completed: false,
                     }
                 }
-            }
-        }, 0)
-        httpRequestMocked.mockImplementationOnce((options, callback) => {
-            callback({
-                statusCode: 404,
-                statusMessage: 'Not found',
-                on: mockedCallback(mockData)
-            })
-            return {
-                end: () => { },
-                on: (event, callback) => {
-                    console.log('[404] event', event)
-                    if (event === 'error') {
-                        callback(new Error('Not Found'))
-                    }
-
-                }
-            }
-        }, 1);
-        httpRequestMocked.mockImplementationOnce((options, callback) => {
-            callback({
-                statusCode: 408,
-                statusMessage: 'Request Timeout',
-                on: mockedCallback(mockData)
-            })
-            return {
-                end: () => { },
-                on: (event, callback) => {
-                    console.log('[408] event', event)
-                    if (event === 'error') {
-                        callback(new Error('Request timed out'))
+            },
+            {
+                isMockOne: true,
+                mockCallIdx: 1,
+                mockData: {
+                    statusCode: 404,
+                    statusMessage: 'Not Found',
+                    data: {
                     }
                 }
-            }
-        }, 2)
+            },
+            {
+                isMockOne: true,
+                mockCallIdx: 2,
+                mockData: {
+                    statusCode: 408,
+                    statusMessage: 'Request Timeout',
+                    data: {
+                    }
+                }
+            },
+        ]
+        const httpRequestMocked = mockHttpRequest(optionRequests)
 
         // When
         const requests = [
@@ -136,7 +103,6 @@ describe('httpClient', () => {
             timeout: 5000,
             key: 'todo1'
         }
-
         const expectedSecondCallValues = {
             hostname: 'jsonplaceholder.typicode.com',
             path: '/todos/test',
@@ -145,7 +111,6 @@ describe('httpClient', () => {
             timeout: 3000,
             key: 'todo2'
         }
-
         const expectedThirdCallValues = {
             hostname: 'jsonplaceholder.typicode.com',
             path: '/todos/3',
