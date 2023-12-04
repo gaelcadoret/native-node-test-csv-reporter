@@ -23,6 +23,12 @@ describe('modules/jsonParser', () => {
                     "type": "@device_type"
                 },
                 {
+                    "@id": "price:YYYY",
+                    "url": "@url_to_replace", // lvl 1
+                    "name": "template n°1 (mobile)", // lvl 1
+                    "type": "@device_type"
+                },
+                {
                     "url": "@url_to_replace", // lvl 1
                     "name": "template n°2 (desktop)", // lvl 1
                     "description": "template n°2", // lvl 1

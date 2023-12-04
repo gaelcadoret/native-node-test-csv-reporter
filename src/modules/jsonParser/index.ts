@@ -50,7 +50,6 @@ const parseLevelReducer = (lvl, arrayIdx) => (acc, [key, val]) => {
         if (key === "@id") {
             console.log(`%c find alias (key) @id %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
             const [resource, id] = extractResourceAndId(val)
-            // const context = mContext.get('config');
             const context = getResourceContext(resource);
             console.log(`Fetch /${resource}/${id} with the context => ${JSON.stringify(context, null, 2)}.`)
         }
