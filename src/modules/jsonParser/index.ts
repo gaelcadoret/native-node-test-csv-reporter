@@ -8,8 +8,22 @@ const isArray = (val) => Array.isArray(val)
 const mapAndParse = (val, lvl) => val.map((el, idx) => jsonParser(el, lvl, idx))
 const split = (separator) => (str) => str.split(separator);
 const splitByColon = split(":");
+const extractResourceAndId = (val) => splitByColon(val)
+const contextReducer = (acc, [key, val]) => ({
+    ...acc,
+    [key]: val
+})
+const extractContext = (val) => {
+    return Object.entries(val).reduce(contextReducer, {})
+}
+const getResourceContext = (resource) => {
+    const context = mContext.get('config')
+    return context
+        ? context[resource]
+        : undefined;
+}
 
-const extractContextAndId = (val) => splitByColon(val)
+const mContext = new Map([['config', null]]);
 
 const parseLevelReducer = (lvl, arrayIdx) => (acc, [key, val]) => {
     if (arrayIdx != null) console.log(`%c arrayIdx %c => ${arrayIdx}`, 'background-color:#f2b7b3;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
@@ -27,10 +41,18 @@ const parseLevelReducer = (lvl, arrayIdx) => (acc, [key, val]) => {
         console.log(`%c find alias (key) %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
         console.log('val', val)
 
+        if (key === "@context") {
+            console.log(`%c find alias (key) @context %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+            const context = extractContext(val)
+            mContext.set('config', context);
+        }
+
         if (key === "@id") {
             console.log(`%c find alias (key) @id %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
-            const [context, id] = extractContextAndId(val)
-            console.log("[context, id]", [context, id])
+            const [resource, id] = extractResourceAndId(val)
+            // const context = mContext.get('config');
+            const context = getResourceContext(resource);
+            console.log(`Fetch /${resource}/${id} with the context => ${JSON.stringify(context, null, 2)}.`)
         }
     }
 

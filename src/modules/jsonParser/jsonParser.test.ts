@@ -8,7 +8,10 @@ describe('modules/jsonParser', () => {
         // Given
         const jsonObj = {
             "@context": { // lvl 0
-                "products": { // lvl 1
+                "product": { // lvl 1
+                    "version": "2.0"  // lvl 2
+                },
+                "price": { // lvl 1
                     "version": "1.0"  // lvl 2
                 }
             },
