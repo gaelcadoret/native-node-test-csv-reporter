@@ -26,44 +26,44 @@ const getResourceContext = (resource) => {
 const mContext = new Map([['config', null]]);
 
 const parseLevelReducer = (lvl, arrayIdx) => (acc, [key, val]) => {
-    if (arrayIdx != null) console.log(`%c arrayIdx %c => ${arrayIdx}`, 'background-color:#f2b7b3;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+    // if (arrayIdx != null) console.log(`%c arrayIdx %c => ${arrayIdx}`, 'background-color:#f2b7b3;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
 
-    console.log('key', key);
-    console.log('val', val);
+    // console.log('key', key);
+    // console.log('val', val);
 
     // manage jsonPath
     if (startsWithJsonPath(val)) {
-        console.log(`%c find jsonPath %c => ${val}`, 'background-color:orange;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+        // console.log(`%c find jsonPath %c => ${val}`, 'background-color:orange;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
     }
 
     // manage alias in key
     if (startsWithAlias(key)) {
-        console.log(`%c find alias (key) %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
-        console.log('val', val)
+        // console.log(`%c find alias (key) %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+        // console.log('val', val)
 
         if (key === "@context") {
-            console.log(`%c find alias (key) @context %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+            // console.log(`%c find alias (key) @context %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
             const context = extractContext(val)
             mContext.set('config', context);
         }
 
         if (key === "@id") {
-            console.log(`%c find alias (key) @id %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+            // console.log(`%c find alias (key) @id %c => ${key}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
             const [resource, id] = extractResourceAndId(val)
             const context = getResourceContext(resource);
-            console.log(`Fetch /${resource}/${id} with the context => ${JSON.stringify(context, null, 2)}.`)
+            // console.log(`Fetch /${resource}/${id} with the context => ${JSON.stringify(context, null, 2)}.`)
         }
     }
 
     // manage alias in value
     if (startsWithAlias(val)) {
-        console.log(`%c find alias (val) %c => ${val}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
-        console.log('acc', acc)
+        // console.log(`%c find alias (val) %c => ${val}`, 'background-color:lightblue;font-weight:bold;color:white;', 'background-color:white;color:gray;font-style:italic;')
+        // console.log('acc', acc)
     }
 
     // manage arrays
     if (isArray(val)) {
-        console.log(`%c find array %c => ${key}`, 'background-color:yellow;font-weight:bold;color:#333333;', 'background-color:white;color:gray;font-style:italic;')
+        // console.log(`%c find array %c => ${key}`, 'background-color:yellow;font-weight:bold;color:#333333;', 'background-color:white;color:gray;font-style:italic;')
         return {
             ...acc,
             [key]: mapAndParse(val, lvl + 1),
@@ -72,7 +72,7 @@ const parseLevelReducer = (lvl, arrayIdx) => (acc, [key, val]) => {
 
     // manage objects
     if (isObject(val)) {
-        console.log(`%c find object %c => ${key}`, 'background-color:lightgreen;font-weight:bold;color:#333333;', 'background-color:white;color:gray;font-style:italic;')
+        // console.log(`%c find object %c => ${key}`, 'background-color:lightgreen;font-weight:bold;color:#333333;', 'background-color:white;color:gray;font-style:italic;')
 
         return {
             ...acc,
@@ -87,7 +87,7 @@ const parseLevelReducer = (lvl, arrayIdx) => (acc, [key, val]) => {
 }
 
 const jsonParser = (obj, lvl = 0, arrayIdx = null) => {
-    console.log('%clvl => %c ' + lvl + " ", 'color: gray', 'background-color:#00CC00;color:white')
+    // console.log('%clvl => %c ' + lvl + " ", 'color: gray', 'background-color:#00CC00;color:white')
     return Object.entries(obj).reduce(parseLevelReducer(lvl, arrayIdx), {});
 }
 

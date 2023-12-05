@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/index.ts",
     "test": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test\" \"./src/**/*.test.ts\"",
+    "test1": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test\" \"./src/adventOfCode/**/*.test.ts\"",
     "test:json": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test --test-reporter ./src/modules/json-reporter/reporter/index.ts --test-reporter-destination=stdout \" \"./src/**/*.test.ts\"",
     "test:csv": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test --test-reporter ./src/modules/csv-reporter/reporter/index.ts --test-reporter-destination=stdout \" \"./src/**/*.test.ts\"",
     "test:coverage": "NODE_ENV=test glob -c \"c8 node --loader tsx --no-warnings --test\" \"./src/**/*.test.ts\"",
@@ -28,9 +29,11 @@
   },
   "devDependencies": {
     "@types/node": "^20.6.3",
+    "@types/ramda": "^0.29.9",
     "c8": "^8.0.1",
     "glob": "^10.3.5",
     "istanbul-lib-coverage": "^3.2.0",
+    "ramda": "^0.29.1",
     "tslint": "^6.1.3",
     "tsx": "^3.12.10",
     "typescript": "^5.2.2"
