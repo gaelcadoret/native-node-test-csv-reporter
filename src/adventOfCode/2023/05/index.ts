@@ -37,19 +37,74 @@ const headerSeedTransformer = pipe(
 
 const isHeaderLine = (lineNumber) => lineNumber === 0;
 
-const populateMap = (entryMap) => (line, lineNumber) => {
+const nMap = new Map();
+const entryMapSet = (key: string) => (val: any) => nMap.set(key, val);
+const entryMapSetSeeds = entryMapSet('seeds');
+
+const populateMap = (line, lineNumber) => {
     if (isHeaderLine(lineNumber)) {
-        entryMap.set('seeds', headerSeedTransformer(line));
+        entryMapSetSeeds(headerSeedTransformer(line));
     } else {
         const [key, ...seeds] = line.split('\n');
+
         const mapKey = key.replace(' map:', '');
-        entryMap.set(mapKey, seedFormatter(seeds));
+        const entryMapSetKey = entryMapSet(mapKey);
+        entryMapSetKey(seedFormatter(seeds))
     }
 }
 
+const jsonStringifyNmap = (nMap) => JSON.stringify(Array.from(nMap.entries()))
+const jsonToMap = (jsonText) => new Map(JSON.parse(jsonText));
+
 export const parseEntry = (obj) => {
-    const entryMap = new Map();
-    console.log('obj', contentParser(obj))
-    contentParser(obj).forEach(populateMap(entryMap));
-    return entryMap;
+    contentParser(obj).forEach(populateMap);
+    console.log('nMap', nMap)
+    return nMap;
 }
+
+const arrayOf = (start: number, length: number) => Array.from({length}, (_, idx) => (start-1)+idx+1)
+
+const generateSourceDestinationMap = (nMap, sourceRange, destinationRange) => {
+    arrayOf(0, sourceRange.length).forEach((_, idx) => {
+        const source = sourceRange[idx];
+        const destination = destinationRange[idx];
+        nMap.set(source, destination);
+    })
+
+    return nMap;
+}
+
+const generateMapEntries = (nMap) => (line) => {
+    const [dest, start, length] = line;
+    const sourceRange = arrayOf(start, length);
+    const destinationRange = arrayOf(dest, length);
+    return generateSourceDestinationMap(nMap, sourceRange, destinationRange);
+}
+
+export const generateMap = (srcToDestMap, maxFromMaps, maxValue) => {
+    const nMap = new Map()
+
+    srcToDestMap.forEach(generateMapEntries(nMap));
+    const mapOfNVals = arrayOf(0, maxFromMaps+1);
+
+    mapOfNVals.forEach((idx) => {
+        if (!nMap.has(idx) && idx <= maxValue) {
+            nMap.set(idx, idx);
+        } else {
+            if (nMap.has(idx)) {
+                if (idx > maxValue) {
+                    nMap.delete(idx);
+                }
+            }
+        }
+    })
+    // console.log('nMap', nMap)
+    return nMap;
+}
+export const getMaxFromArray = (arr) => Math.max(...arr);
+export const getMaxFromMap = (nMap, mapKey) => {
+    const lines = nMap.get(mapKey)
+    const maxs = lines.map(([_, start, length]) => start + length - 1);
+    return getMaxFromArray(maxs);
+}
+export const getMaxHeaderValue = (nMap, key) => Math.max(...nMap.get(key))
