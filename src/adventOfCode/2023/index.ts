@@ -71,6 +71,7 @@ if (isMainThread) {
         if (data.type === 'split_big_array') {
             console.log('response', data.response)
 
+            // workers.loop.terminate();
             workers.loop.postMessage({
                 action: 'start',
                 type: 'process_range',
@@ -102,7 +103,7 @@ if (isMainThread) {
             data: {
                 start: seedsSplitted[0][0],
                 arrayLength: seedsSplitted[0][1],
-                chunkLength: 100000,
+                maxBatchSize: 6,
             }
         });
     }, 1000)

@@ -83,8 +83,21 @@ export const createRanges = (arrSize, batchSize) => {
         [getStartOfRange(idx, batchSize), getEndOfRange(idx, batchSize)])
 }
 
+const isLastRange = (nbRange, idx) => nbRange === idx + 1
+const getStartOfRange2 = (start, idx, batchSize) => start + (idx * batchSize)
+const getEndOfRange2 = (start, idx, batchSize) => start + ((idx + 1) * batchSize) - 1;
 export const createRangesV2 = (start, arrayLength, batchSize = 0) => {
-    return [start, start + arrayLength - 1];
+    const nbRange = Math.ceil(arrayLength / batchSize);
+    const lastRangeLimit = start + arrayLength - 1;
+
+    return arrayOf(0, nbRange).map((range, idx) => {
+        const startOfRange = getStartOfRange2(start, idx, batchSize);
+        const endOfRange = isLastRange(nbRange, idx)
+            ? lastRangeLimit
+            : getEndOfRange2(start, idx, batchSize);
+
+        return [startOfRange, endOfRange]
+    });
 }
 
 const generateMapEntries = (nMap) => (line) => {

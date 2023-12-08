@@ -24,14 +24,14 @@ console.log(`[${workerName}] isMainThread`, isMainThread);
             if (data.type === 'split_big_array') {
                 console.log(`[${workerName}] type => split_big_array`)
 
-                const { start, arrayLength, chunkLength } = data.data;
+                const { start, arrayLength, maxBatchSize } = data.data;
 
-                console.log({ start, arrayLength, chunkLength })
+                console.log({ start, arrayLength, maxBatchSize })
 
                 const response1 = createRangesV2(
                     start,
                     arrayLength,
-                    chunkLength,
+                    maxBatchSize,
                 );
 
                 parentPort.postMessage({
@@ -39,7 +39,7 @@ console.log(`[${workerName}] isMainThread`, isMainThread);
                     success: true,
                     type: 'split_big_array',
                     origin: workerName,
-                    terminate: false,
+                    terminate: true,
                     timestamp: new Date(Date.now()).toISOString()
                 })
             }
@@ -51,9 +51,6 @@ console.log(`[${workerName}] isMainThread`, isMainThread);
 
                 console.log('range', range)
 
-                const arrayFromRange = arrayOf(
-                    range[0],
-                    range[1] - range[0] + 1);
 
                 // const response2 = arrayFromRange.reduce((acc, el) => {
                 //     return acc + el;
