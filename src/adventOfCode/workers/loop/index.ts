@@ -26,8 +26,6 @@ console.log(`[${workerName}] isMainThread`, isMainThread);
 
                 const { start, arrayLength, maxBatchSize } = data.data;
 
-                console.log({ start, arrayLength, maxBatchSize })
-
                 const response1 = createRangesV2(
                     start,
                     arrayLength,
@@ -47,19 +45,17 @@ console.log(`[${workerName}] isMainThread`, isMainThread);
             if (data.type === 'process_range') {
                 console.log(`[${workerName}] type => process_range`)
 
-                const { range } = data.data;
+                const { range, idx, length } = data.data;
 
                 console.log('range', range)
-
-
-                // const response2 = arrayFromRange.reduce((acc, el) => {
-                //     return acc + el;
-                // }, 0)
+                console.log('idx', idx)
 
                 parentPort.postMessage({
-                    response: arrayFromRange,
+                    response: range,
+                    idx,
+                    length,
                     success: true,
-                    type: data.type,
+                    type: 'process_range',
                     origin: workerName,
                     terminate: false,
                     timestamp: new Date(Date.now()).toISOString()

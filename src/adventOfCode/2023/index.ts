@@ -67,22 +67,32 @@ if (isMainThread) {
 
     workers.loop.on('message', (data) => {
         console.log(`[main] data from worker`);
+        console.log('data', data)
 
         if (data.type === 'split_big_array') {
-            console.log('response', data.response)
+            const length = data.response.length;
 
-            // workers.loop.terminate();
-            workers.loop.postMessage({
-                action: 'start',
-                type: 'process_range',
-                data: {
-                    range: data.response
-                }
+            data.response.forEach((currentRange, idx) => {
+                console.log('currentRange', currentRange)
+                console.log('idx', idx)
+
+                workers.loop.postMessage({
+                    action: 'start',
+                    type: 'process_range',
+                    data: {
+                        range: currentRange,
+                        idx,
+                        length,
+                    }
+                });
             });
+
+
         }
         if (data.type === 'process_range') {
-            console.log('response', data.response)
+            console.log('response from worker (process_range)', data)
 
+            if (data.idx === data.length - 1) workers.loop.terminate();
             // workers.loop.postMessage({
             //     action: 'start',
             //     type: 'process_range',
