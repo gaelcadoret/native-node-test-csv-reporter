@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.ts",
+    "ad": "node --loader tsx --no-warnings src/adventOfCode/2023/index.ts",
     "test": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test\" \"./src/**/*.test.ts\"",
     "test1": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test\" \"./src/adventOfCode/**/*.test.ts\"",
     "test:json": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test --test-reporter ./src/modules/json-reporter/reporter/index.ts --test-reporter-destination=stdout \" \"./src/**/*.test.ts\"",
