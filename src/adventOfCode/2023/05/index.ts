@@ -1,4 +1,5 @@
 import {pipe, range, splitEvery} from "ramda";
+import {isMainThread, parentPort, Worker} from "node:worker_threads";
 
 const trim = (str) => str.trim();
 const splitBy = (separator) => (str) => str.split(separator);
@@ -161,11 +162,8 @@ export const getMinLocation = (entryMap) => {
     return getMinFromArr(locations);
 }
 
-const findRange = (seed, currentValue) => {
-    // console.log('seed', seed)
-    // console.log('currentValue', currentValue)
-    return currentValue.find((range) => {
-        const [dest, start, length] = range;
+export const findRange = (seed, currentValue) => {
+    return currentValue.find(([dest, start, length]) => {
         return seed >= start && seed <= start + length
     })
 }
@@ -227,7 +225,7 @@ export const getMinLocationV3 = (entryMap) => {
             const keys = entryMap.keys();
             let newValue;
 
-            for(let i = 0; i < size; i++) {
+            for (let i = 0; i < size; i++) {
                 const key = keys.next().value;
 
                 if (key !== 'seeds') {
@@ -245,43 +243,146 @@ export const getMinLocationV3 = (entryMap) => {
             return newValue
         })
     })
-
-    // const locations = seeds.map((seed) => {
-    //
-    //     const keys = entryMap.keys();
-    //     let newValue;
-    //     const path = [];
-    //
-    //     for(let i = 0; i < size; i++) {
-    //         const key = keys.next().value;
-    //
-    //         if (key !== 'seeds') {
-    //             // console.log('key', key)
-    //             const currentValue = entryMap.get(key)
-    //             newValue = newValue || seed
-    //             // console.log('find range for newValue', newValue)
-    //             const range = findRange(newValue, currentValue)
-    //             // console.log('range', range)
-    //             if (range) {
-    //                 const [dest, start, length] = range;
-    //                 const diff = newValue - start;
-    //                 newValue = dest + diff;
-    //                 // console.log('newValue', newValue)
-    //                 // path.push(newValue)
-    //             }
-    //             // else {
-    //             //     // newValue = newValue || seed;
-    //             //     console.log('newValue', newValue)
-    //             //     // path.push(newValue)
-    //             //
-    //             // }
-    //         }
-    //     }
-    //
-    //     return newValue
-    // })
-
     return getMinFromArr(locations.flat());
 }
 
 export const getMinFromArr = (arr) => Math.min(...arr);
+
+export const getMinLocationV4 = (entry, _dirname) => {
+    if (isMainThread) {
+        const entryMap = parseEntry(entry);
+        // assert.equal(getMinLocationV3(entryMap), 46)
+
+        const seeds = entryMap.get('seeds')
+        const seedsSplitted = splitEvery(2, seeds)
+
+        // console.log('seedsSplitted', seedsSplitted)
+
+        const workers = {
+            loop: new Worker(`${_dirname}/workers/loop`),
+            // loop2: new Worker(`${_dirname}/workers/loop2`),
+        }
+
+        const minLocations = []
+
+        workers.loop.on('message', (data) => {
+            console.log(`[main] data from worker`);
+            // console.log('data', data)
+
+            if (data.type === 'split_big_array') {
+                const length = data.response.length;
+
+                data.response.forEach((currentRange, idx) => {
+                    workers.loop.postMessage({
+                        action: 'start',
+                        type: 'process_range',
+                        data: {
+                            range: currentRange,
+                            idx,
+                            length,
+                        }
+                    });
+                });
+
+
+            }
+            if (data.type === 'process_range_locations') {
+                console.log('response from worker (process_range_locations)')
+
+                // console.log('locations', data.response)
+                minLocations.push(data.response);
+
+                if (data.idx === data.length - 1) {
+                    console.log('Calculate min locations... - length =>', minLocations.length)
+                    console.log('locations', minLocations)
+                    console.log('min location', getMinFromArr(minLocations))
+
+                    setTimeout(() => {
+                        workers.loop.terminate();
+                    }, 2000)
+                }
+
+
+                // workers.loop.postMessage({
+                //     action: 'start',
+                //     type: 'process_range',
+                //     data: {
+                //         range: data.response[0]
+                //     }
+                // });
+            }
+        });
+        workers.loop.on('error', (error) => console.error(error));
+        workers.loop.on('exit', code => console.log(`Worker exited with code ${code}.`));
+        // workers.loop2.on('message', loop2Listener(workers));
+
+        setTimeout(() => {
+            console.log('seedsSplitted', seedsSplitted)
+
+            for (let i = 0; i < seedsSplitted.length; i++) {
+                const [ start, arrayLength ] = seedsSplitted[i];
+                workers.loop.postMessage({
+                    action: 'start',
+                    type: 'split_big_array',
+                    data: {
+                        start,
+                        arrayLength,
+                        maxBatchSize: 50000,
+                    }
+                });
+            }
+        }, 1000)
+
+    } else {
+        // const data = workerData;
+        parentPort.postMessage(`You said what ?`);
+    }
+}
+
+// export type UseWorker = (fn: string, options: WorkerOptions) => Promise<any>
+export const useWorker = (fn, options) => {
+    const worker = new Worker(`${options._dirname}/workers/generic`);
+
+    worker.on('message', (data) => {
+        if (data.type === 'start_succeed') {
+            console.log('Message from worker: Default process has been started...')
+            console.log('data', data);
+
+            worker.postMessage({
+                origin: 'main',
+                type: 'execute',
+                fn: fn,
+                args: options.args,
+                timeout: 10000,
+                timestamp: new Date(Date.now()).toISOString()
+            })
+
+            worker.postMessage({
+                origin: 'main',
+                type: 'timeout.start',
+                timeout: 10000,
+                timestamp: new Date(Date.now()).toISOString()
+            })
+        }
+
+        if (data.type === 'timeout.end') {
+            if (data.terminate) {
+                worker.terminate();
+            }
+        }
+
+        if (data.type === 'fn.response') {
+            console.log('Message from worker: function response:')
+            console.log('data', data.response);
+        }
+    })
+    worker.on('error', (error) => console.error(error));
+    worker.on('exit', code => console.log(`Worker exited with code ${code}.`));
+
+    // worker.postMessage({
+    //     success: true,
+    //     origin: 'main',
+    //     type: 'start',
+    //     timestamp: new Date(Date.now()).toISOString()
+    // })
+}
