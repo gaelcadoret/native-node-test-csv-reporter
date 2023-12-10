@@ -1,4 +1,5 @@
 import {parentPort, isMainThread} from 'node:worker_threads';
+import { execute } from "../../2023/02";
 
 const workerName = 'worker.generic-01';
 
@@ -11,6 +12,7 @@ const getDateToIsoString = () => {
 const add = (a, b) => a + b;
 const workerLibrary = {
     add,
+    execute,
 }
 
 ;(() => {

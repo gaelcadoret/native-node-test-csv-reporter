@@ -1,6 +1,11 @@
 import {pipe, range, splitEvery} from "ramda";
 import {isMainThread, parentPort, Worker} from "node:worker_threads";
 
+/**
+ * Last response : 183212530
+ * FAILED => too high
+ */
+
 const trim = (str) => str.trim();
 const splitBy = (separator) => (str) => str.split(separator);
 const splitByDoubleCarriageReturn = splitBy("\n\n");

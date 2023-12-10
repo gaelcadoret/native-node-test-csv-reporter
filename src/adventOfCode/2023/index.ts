@@ -1,280 +1,119 @@
-import {splitEvery} from "ramda";
-
-/**
- * Last response : 183212530
- * FAILED => too high
- */
-
-const startResourceUsage = process.resourceUsage()
-const startTime = process.hrtime();
-
-import {Worker, isMainThread, parentPort} from 'node:worker_threads';
 import path from "path";
-import {getMinFromArr, getMinLocationV3, getMinLocationV4, parseEntry, useWorker} from "./05";
-import assert from "node:assert";
-
-// import loopListener from "../workers/loop/listeners";
-// import loop2Listener from "../workers/loop2/listeners";
+import { useWorker } from "./utils";
 
 const __dirname = new URL('.', import.meta.url).pathname
-
 const _dirname = path.dirname(__dirname);
-
-// const entry = `
-//         seeds: 79 14 55 13
-//
-// seed-to-soil map:
-// 50 98 2
-// 52 50 48
-//
-// soil-to-fertilizer map:
-// 0 15 37
-// 37 52 2
-// 39 0 15
-//
-// fertilizer-to-water map:
-// 49 53 8
-// 0 11 42
-// 42 0 7
-// 57 7 4
-//
-// water-to-light map:
-// 88 18 7
-// 18 25 70
-//
-// light-to-temperature map:
-// 45 77 23
-// 81 45 19
-// 68 64 13
-//
-// temperature-to-humidity map:
-// 0 69 1
-// 1 0 69
-//
-// humidity-to-location map:
-// 60 56 37
-// 56 93 4
-//         `
-
-const entry = `
-        seeds: 304740406 53203352 1080760686 52608146 1670978447 367043978 1445830299 58442414 4012995194 104364808 4123691336 167638723 2284615844 178205532 3164519436 564398605 90744016 147784453 577905361 122056749
-
-seed-to-soil map:
-0 699677807 922644641
-4174180469 3833727510 120786827
-1525682201 2566557266 229511566
-3280624601 3954514337 340452959
-2228029508 2796068832 310221139
-3621077560 3280624601 553102909
-2120836342 592484641 107193166
-1982514669 227320902 138321673
-1755193767 0 227320902
-922644641 1622322448 603037560
-2538250647 365642575 226842066
-2765092713 2225360008 341197258
-
-soil-to-fertilizer map:
-1916776044 145070025 3464138
-1920240182 0 145070025
-706160141 2208005933 115191764
-2898492924 830275742 87027483
-3489083348 3344594558 103871907
-2985520407 148534163 415139950
-821351905 917303225 327392865
-1148744770 1517236949 182706102
-295069722 3448466465 411090419
-1816984891 3244803405 99791153
-4282585972 4292886644 2080652
-3592955255 563674113 266601629
-4266462972 4158154511 16123000
-1331450872 1244696090 272540859
-2715943131 3062253612 182549793
-4284666624 4174277511 10300672
-4158154511 4184578183 108308461
-1603991731 1995012773 212993160
-2065310207 2411620688 650632924
-0 1699943051 295069722
-3400660357 2323197697 88422991
-
-fertilizer-to-water map:
-3585244197 3493316345 482900943
-2871272496 878061687 456215665
-3477664135 4187387234 107580062
-845559238 15587711 56716031
-121711204 2918313406 409174755
-1639718746 0 15587711
-530885959 2603640127 314673279
-902275269 2435903232 167736895
-2635221133 72303742 236051363
-1070012164 308355105 569706582
-1699846244 1334277352 935374889
-4279315086 3477664135 15652210
-1655306457 2269652241 44539787
-109056711 2423248739 12654493
-0 2314192028 109056711
-4068145140 3976217288 211169946
-
-water-to-light map:
-3841742547 3016842841 17384315
-2875021919 2637593760 185450069
-3413635232 3588265685 87508205
-1311241677 236307150 54007684
-3349161906 4276682782 18284514
-896790030 1355845673 34430118
-3060471988 3835573209 145836645
-2741184131 3675773890 133837788
-1387754847 947687177 15489861
-3785944618 2057196631 55797929
-2006585491 2931426646 85416195
-3873217816 3809611678 25961531
-1667765627 643929130 34884144
-2092001686 2434956599 202637161
-1001898651 158618769 77688381
-3899179347 2253048950 181907649
-1786416461 377140410 101956748
-0 833901414 113785763
-1403244708 479097158 56815029
-3859126862 3034227156 14090954
-747996464 678813274 31450438
-869173795 963177038 27616235
-3268502638 2006585491 50611140
-113785763 0 148879571
-262665334 1511505797 386606610
-1187603975 710263712 123637702
-3319113778 3987361499 30048128
-3367446420 2885237834 46188812
-931220148 990793273 15913032
-1460059737 1006706305 120880314
-1079587032 535912187 108016943
-3645890228 2112994560 140054390
-3206308633 2823043829 62194005
-1888373209 148879571 9739198
-3501143437 3443518894 144746791
-779446902 1127586619 89726893
-947133180 1217313512 54765471
-2481910976 4017409627 259273155
-1365249361 1390275791 22505486
-4087038641 3048318110 207928655
-1702649771 1272078983 83766690
-649271944 1412781277 98724520
-2294638847 3256246765 187272129
-4081086996 3981409854 5951645
-1580940051 290314834 86825576
-
-light-to-temperature map:
-2659452899 3773423191 23529065
-1010417677 1830019321 229964714
-1506263997 1764304095 65715226
-3017023682 3993999178 103632805
-3758361154 3931294907 62704271
-2513441862 2529586713 106552791
-3821065425 3163657189 7959671
-3410504451 3191697730 271334719
-2500616406 3150831733 12825456
-2065874786 2636139504 257698620
-4142272690 2382216135 108163002
-1377732678 1378901025 61208694
-91217027 248578952 8927711
-2463617376 3879075083 36999030
-3982807123 2315058258 67157877
-2323573406 2065874786 97274446
-958870382 916323074 51547295
-3868386197 3579887474 114420926
-931392999 1351423642 27477383
-2942753127 3694308400 74270555
-1812734437 168620508 79958444
-3301364949 2163149232 3197696
-2420847852 2166346928 42769524
-3829025096 3111470632 39361101
-2619994653 2490379137 39207576
-1571979223 1523548881 240755214
-2927532333 3916074113 15220794
-3125500723 4097631983 175864226
-1438941372 10080856 67322625
-2049903179 0 10080856
-3304562645 2209116452 105941806
-1976132043 1277652506 73771136
-2659202229 3171616860 250670
-4256036535 3463032449 38930761
-1240382391 257506663 137350287
-0 77403481 91217027
-3120656487 3768578955 4844236
-100144738 967870369 309782137
-409926875 394856950 521466124
-2682981964 4273496209 21471087
-2704453051 3501963210 77924264
-2802207515 2893838124 125324818
-3681839170 3796952256 76521984
-4250435692 3873474240 5600843
-1892692881 1440109719 83439162
-4049965000 3019162942 92307690
-2782377315 3171867530 19830200
-
-temperature-to-humidity map:
-1281293605 2434144353 57731817
-3534843655 3623804479 36539813
-1516028925 367078655 499627624
-3340374639 3427302148 25514722
-1176213912 2491876170 105079693
-3872645852 3827818849 188531931
-508302359 1375008638 300832898
-0 866706279 508302359
-4146417618 3475254801 148549678
-4083438506 3660344292 62979112
-3365889361 3745584127 82234722
-4061177783 3723323404 22260723
-2015656549 1675841536 348405327
-1056134836 246999579 120079076
-3448124083 3452816870 22437931
-3321587434 3408514943 18787205
-3470562014 4016350780 64281641
-3571383468 3321587434 86927509
-1339025422 2024246863 177003503
-809135257 0 246999579
-2364061876 2596955863 115651453
-3658310977 4080632421 214334875
-2479713329 2201250366 232893987
-
-humidity-to-location map:
-2408792839 708984436 12070437
-3916327360 4103567762 90492800
-2136669394 2902458135 226099404
-1414655297 721054873 722014097
-2462136308 3514619416 2467233
-1254861475 3327498132 98562162
-2362768798 569836962 46024041
-4185175199 3916327360 8885363
-421054090 234463197 201173738
-2497827912 1550759989 35404865
-849065671 0 224309687
-37059832 615861003 93123433
-4006820160 3925212723 178355039
-2863253575 1705311678 653833074
-622227828 1443068970 107691019
-2464603541 2869233764 33224371
-1353423637 3128557539 61231660
-1073375358 3426060294 47286090
-2725544642 3189789199 137708933
-26906322 224309687 10153510
-2420863276 3473346384 41273032
-729918847 1586164854 119146824
-2533232777 2676921899 192311865
-0 2359144752 26906322
-1120661448 435636935 134200027
-130183265 2386051074 290870825
-        `
-
-const add = (a, b) => a + b
 
 export type WorkerOptions = {
     args: any[]
     _dirname: string
 }
 
-useWorker('add', {args: [1457, 9514], _dirname})
+const entry = `
+Game 1: 3 blue, 2 green, 6 red; 17 green, 4 red, 8 blue; 2 red, 1 green, 10 blue; 1 blue, 5 green
+Game 2: 9 red, 2 green; 5 red, 1 blue, 6 green; 3 green, 13 red, 1 blue; 3 red, 6 green; 1 blue, 14 red, 6 green
+Game 3: 6 red, 3 blue, 8 green; 6 blue, 12 green, 15 red; 3 blue, 18 green, 4 red
+Game 4: 1 blue, 4 red; 2 blue, 6 red; 13 blue; 11 blue, 1 green, 8 red; 10 blue, 3 green, 2 red; 3 green, 7 blue
+Game 5: 2 red, 1 blue, 8 green; 2 blue, 7 green, 3 red; 1 blue, 7 green, 4 red; 2 blue, 1 green, 1 red; 13 green, 1 blue
+Game 6: 7 green, 1 red, 3 blue; 1 red, 4 blue; 6 green, 6 blue; 8 green, 1 red; 6 green, 1 red, 5 blue
+Game 7: 10 blue, 1 green; 5 red, 8 blue, 3 green; 11 blue, 5 red, 8 green; 2 blue, 8 red, 5 green; 7 blue, 9 green; 6 blue, 2 green, 7 red
+Game 8: 15 green, 8 blue, 3 red; 6 blue, 7 green, 5 red; 2 green, 1 red, 5 blue; 9 blue, 9 green, 5 red
+Game 9: 16 red; 5 blue, 6 red, 9 green; 7 blue, 6 green, 2 red; 15 red, 5 blue, 3 green; 1 red, 6 green, 6 blue; 3 blue, 7 red, 5 green
+Game 10: 17 green, 5 blue, 6 red; 18 green, 9 red; 4 red, 4 blue, 4 green; 10 red, 6 green, 5 blue; 8 red, 4 blue, 12 green
+Game 11: 4 blue, 2 green, 5 red; 1 blue, 1 red; 9 blue, 1 green, 2 red; 4 red, 10 blue; 3 green, 4 blue, 3 red
+Game 12: 4 green, 2 blue, 7 red; 4 blue, 2 green, 1 red; 7 green, 5 blue, 9 red
+Game 13: 1 green, 3 red, 3 blue; 1 blue, 10 green; 2 green, 3 blue
+Game 14: 7 red, 3 green, 12 blue; 5 red, 4 green, 6 blue; 13 blue, 1 red; 4 blue, 6 red, 2 green; 4 red, 3 blue; 9 red, 13 blue
+Game 15: 4 blue, 5 red, 2 green; 7 red, 2 blue, 1 green; 17 red, 3 blue; 2 blue; 4 blue, 8 red
+Game 16: 5 blue; 9 red, 14 green, 5 blue; 5 blue, 9 green
+Game 17: 3 blue, 5 red; 6 blue, 1 green, 4 red; 7 green, 6 blue, 7 red; 1 red, 6 blue, 4 green; 6 green; 1 blue, 6 green
+Game 18: 9 blue, 4 green, 2 red; 1 green, 9 red, 10 blue; 14 red, 10 green, 17 blue; 12 red, 1 green, 15 blue; 3 blue, 8 red, 2 green; 3 green, 11 red, 13 blue
+Game 19: 1 blue, 3 red, 9 green; 14 green, 3 red, 2 blue; 1 blue, 8 red, 11 green; 4 blue, 3 red; 14 red, 4 green; 5 red, 8 green
+Game 20: 2 blue, 3 red, 2 green; 3 blue, 2 green; 1 red, 4 green, 5 blue; 9 blue, 9 green, 3 red; 3 green, 1 blue, 4 red; 1 red, 9 green, 2 blue
+Game 21: 11 blue, 6 red; 8 red; 7 red, 6 green, 11 blue; 7 green, 7 red, 11 blue; 6 red, 12 blue
+Game 22: 7 green, 8 blue, 5 red; 12 green, 4 red, 2 blue; 12 green, 7 red, 11 blue
+Game 23: 5 green, 2 blue, 7 red; 6 blue, 8 green, 3 red; 10 red, 5 blue; 6 green, 3 blue; 1 green, 8 red
+Game 24: 17 blue, 1 green, 2 red; 2 red, 11 green, 9 blue; 6 red, 8 blue
+Game 25: 3 red, 1 blue, 19 green; 1 blue, 1 green, 6 red; 6 green, 5 blue; 4 green, 2 red, 19 blue; 6 red, 19 blue, 18 green; 1 red, 4 blue, 1 green
+Game 26: 3 red, 4 blue, 2 green; 2 red, 1 green, 3 blue; 14 blue, 1 green, 3 red; 5 green, 2 red, 10 blue; 9 blue, 2 red, 7 green; 15 blue, 4 green, 3 red
+Game 27: 3 blue, 5 red, 2 green; 6 red, 7 blue, 9 green; 14 green, 11 red, 6 blue; 3 blue, 20 green, 3 red; 6 red, 15 green, 7 blue; 13 red, 1 blue, 14 green
+Game 28: 4 blue, 7 green, 4 red; 2 red, 4 blue, 7 green; 6 blue, 11 green, 4 red; 6 blue, 6 green, 3 red; 6 green, 12 red
+Game 29: 3 red, 9 blue; 5 red, 5 blue; 2 green, 3 red, 3 blue
+Game 30: 1 green, 1 red, 3 blue; 1 blue, 1 red, 3 green; 1 blue; 1 blue, 3 green, 1 red; 2 blue, 2 green
+Game 31: 2 blue, 1 red; 1 blue, 1 green, 1 red; 4 blue, 3 green; 1 red, 3 green, 2 blue; 2 green
+Game 32: 1 blue, 6 green; 9 red, 6 green; 1 blue, 15 red, 3 green
+Game 33: 18 green, 1 blue, 10 red; 10 red, 1 blue, 7 green; 11 green; 6 red, 13 green
+Game 34: 10 red, 14 blue, 6 green; 2 green, 13 blue, 1 red; 8 green, 7 blue, 1 red; 9 blue, 7 green, 4 red
+Game 35: 5 blue, 9 green, 2 red; 7 green, 9 blue, 5 red; 1 green, 5 red
+Game 36: 10 red; 5 red, 1 green, 1 blue; 2 green, 8 red; 9 red, 2 green; 1 blue, 10 red; 6 red, 1 green, 1 blue
+Game 37: 13 red, 1 blue, 7 green; 1 green, 9 red, 3 blue; 4 red, 1 blue, 11 green; 1 red; 1 red, 1 blue; 6 red, 3 blue, 2 green
+Game 38: 3 blue, 12 red, 7 green; 1 green; 12 red, 1 blue
+Game 39: 7 green, 12 blue, 2 red; 3 red, 10 blue, 7 green; 2 red, 8 green, 3 blue; 3 red, 12 blue, 5 green
+Game 40: 7 green, 5 red; 1 green, 2 blue; 2 red, 1 green, 7 blue
+Game 41: 1 red, 7 green, 2 blue; 2 green, 2 blue; 4 blue, 7 green, 1 red; 1 blue, 1 red, 7 green; 6 blue, 2 red, 3 green
+Game 42: 6 blue; 4 green, 18 blue, 1 red; 10 green, 14 blue, 2 red; 6 blue, 4 green; 2 red, 13 blue, 6 green; 6 green, 1 red, 5 blue
+Game 43: 5 blue, 12 red; 5 blue, 2 green, 7 red; 9 red, 4 blue; 1 green, 11 red, 2 blue; 5 red, 1 green; 2 blue, 3 red, 1 green
+Game 44: 4 blue, 9 red, 4 green; 4 blue, 10 red; 4 green, 5 red; 1 green, 2 red, 3 blue
+Game 45: 7 green, 2 blue, 18 red; 19 red, 7 green; 8 green, 1 blue, 19 red; 2 green, 12 red; 6 red, 5 green; 7 green, 10 red
+Game 46: 1 blue, 15 red, 11 green; 7 red, 1 green, 5 blue; 13 red, 2 blue, 2 green; 7 green, 5 blue, 10 red; 12 green, 3 red, 1 blue
+Game 47: 2 blue, 2 red, 5 green; 7 green, 2 red, 7 blue; 10 blue, 2 red, 8 green
+Game 48: 8 green, 10 red; 6 green, 5 red; 12 green, 2 blue; 17 green, 5 red, 1 blue; 14 green, 3 blue, 16 red; 1 blue, 5 red
+Game 49: 5 blue, 6 red, 12 green; 8 blue, 15 green; 4 blue, 3 green, 3 red; 6 red, 11 green, 10 blue; 9 green, 2 red, 10 blue
+Game 50: 10 red, 11 green, 14 blue; 6 green, 8 blue, 17 red; 2 blue, 4 red; 6 blue, 8 green, 17 red; 17 red, 9 blue, 2 green; 13 blue, 16 red, 12 green
+Game 51: 12 red, 2 green, 7 blue; 5 blue, 10 red; 1 blue, 7 red, 1 green; 14 blue, 2 red, 1 green
+Game 52: 5 blue, 5 red, 8 green; 1 blue, 9 green, 7 red; 4 blue, 5 red, 3 green; 7 green, 2 blue, 2 red; 5 red, 3 blue, 17 green; 19 green, 1 red
+Game 53: 4 red, 1 blue, 2 green; 1 green; 2 red; 1 blue, 2 green; 2 green, 4 red
+Game 54: 7 red; 9 red, 2 blue, 14 green; 1 blue, 5 green; 7 green, 3 blue
+Game 55: 11 blue, 2 green; 11 blue, 9 green, 12 red; 8 green, 6 blue, 12 red
+Game 56: 2 green, 1 red, 2 blue; 4 red, 5 green, 5 blue; 5 red, 5 blue, 10 green; 8 red, 3 green, 3 blue
+Game 57: 7 red, 3 green; 1 blue, 6 red, 1 green; 1 blue; 7 red, 1 green, 1 blue; 2 red, 1 blue, 1 green; 3 green, 1 blue
+Game 58: 9 blue, 2 red; 2 green, 9 blue, 2 red; 5 blue, 4 green
+Game 59: 8 red; 5 green, 1 blue, 3 red; 1 green, 8 red
+Game 60: 9 green, 8 blue, 3 red; 10 green, 4 red; 8 blue, 2 green, 4 red; 1 red, 5 green, 7 blue; 1 green, 4 blue, 1 red; 4 blue
+Game 61: 5 blue, 9 red, 4 green; 5 green, 7 blue, 6 red; 7 green, 8 red; 7 blue, 4 red, 2 green; 8 red, 4 blue, 5 green; 3 green, 9 red, 7 blue
+Game 62: 9 red, 10 blue; 1 green, 7 red, 13 blue; 1 green, 11 blue; 6 red, 16 blue, 5 green; 20 red, 1 green, 3 blue
+Game 63: 9 red, 8 green, 1 blue; 13 green, 12 red, 1 blue; 7 green, 5 red, 3 blue
+Game 64: 3 red, 2 blue, 10 green; 3 green; 1 blue, 8 green, 2 red; 7 red, 1 blue, 4 green; 9 red, 1 blue, 4 green
+Game 65: 7 red, 6 green; 1 blue, 4 green, 7 red; 6 red; 6 red, 4 green, 1 blue
+Game 66: 4 blue, 4 green; 1 red, 7 green, 1 blue; 7 green, 3 red, 3 blue; 1 blue, 1 red, 6 green; 3 red, 7 green
+Game 67: 5 green, 16 blue, 5 red; 4 red, 7 green, 3 blue; 4 red, 4 green, 9 blue; 12 green, 5 red; 15 green, 3 red; 10 blue, 6 red, 1 green
+Game 68: 3 green, 3 blue, 5 red; 2 green, 6 blue; 2 green, 3 blue, 1 red; 1 blue, 11 red
+Game 69: 5 green, 1 blue; 16 green, 9 red; 10 red, 18 green
+Game 70: 1 blue, 1 green; 1 red; 1 red, 2 blue, 1 green; 1 green, 2 red; 2 blue, 2 red; 1 red
+Game 71: 11 red; 2 green, 3 blue, 13 red; 1 green, 3 blue; 15 red, 1 green, 3 blue; 4 red
+Game 72: 2 blue, 6 red, 18 green; 6 red, 8 green, 7 blue; 5 blue, 3 red, 12 green; 3 red, 2 blue, 4 green
+Game 73: 12 blue, 7 green, 4 red; 5 green, 2 red, 4 blue; 3 green, 3 red, 10 blue; 1 green, 12 blue, 6 red; 3 blue, 6 green, 14 red
+Game 74: 3 red; 1 blue, 8 green, 11 red; 3 green, 2 red
+Game 75: 5 green, 2 red, 1 blue; 8 green, 2 red; 11 green, 2 red; 2 red, 17 green; 3 blue, 3 green, 2 red
+Game 76: 1 blue, 5 green, 4 red; 8 green, 11 blue, 5 red; 8 blue, 2 red, 11 green
+Game 77: 1 red, 11 blue, 7 green; 8 green, 4 blue; 1 blue, 8 green
+Game 78: 1 green, 1 red, 1 blue; 3 green, 1 blue, 3 red; 10 green, 1 blue; 12 green
+Game 79: 1 red, 11 blue, 6 green; 3 green, 3 red, 5 blue; 16 blue, 1 red, 5 green; 11 blue, 3 green, 2 red; 8 blue, 6 green, 4 red
+Game 80: 5 green; 6 green, 7 red, 4 blue; 7 green, 5 blue; 6 blue, 6 green; 7 blue, 7 green; 6 green, 7 blue, 5 red
+Game 81: 1 green, 14 blue; 11 blue, 1 red; 1 red, 16 green, 2 blue; 9 green, 1 red, 13 blue; 10 green, 8 blue
+Game 82: 7 green, 7 red, 3 blue; 4 blue, 1 green, 4 red; 2 green, 14 blue, 3 red
+Game 83: 15 blue; 2 blue, 1 green, 4 red; 8 green, 4 red, 6 blue
+Game 84: 12 blue, 17 green; 6 green, 1 red, 16 blue; 1 blue, 1 red; 5 blue, 11 green
+Game 85: 5 blue, 15 green, 3 red; 4 blue, 1 green, 11 red; 8 red, 2 blue, 4 green
+Game 86: 11 blue, 16 green, 16 red; 11 blue, 17 red, 10 green; 8 green, 7 red
+Game 87: 2 red, 4 green, 2 blue; 2 blue, 6 green; 2 red, 3 blue, 3 green; 1 red, 4 green; 1 green, 2 blue, 2 red; 4 blue, 4 green
+Game 88: 10 red, 7 green; 2 blue, 6 red, 1 green; 8 blue, 8 red, 7 green; 2 green, 5 blue, 2 red; 3 blue, 3 red, 6 green
+Game 89: 9 blue, 16 green; 2 red, 5 blue, 6 green; 12 blue, 15 green; 8 green, 2 red, 3 blue
+Game 90: 18 red, 1 blue; 3 red, 5 blue, 4 green; 1 blue, 2 green, 6 red; 2 green, 16 red, 3 blue; 5 blue, 13 red, 5 green
+Game 91: 4 red, 7 green, 1 blue; 3 green, 16 blue, 2 red; 4 green, 8 blue
+Game 92: 4 red, 3 green; 5 red, 11 green, 1 blue; 16 green, 13 red; 15 green, 14 red, 3 blue; 3 red, 5 green, 2 blue
+Game 93: 2 blue, 1 red, 3 green; 10 blue, 1 red, 10 green; 11 blue, 16 green, 4 red; 2 green, 20 blue, 7 red; 11 green, 8 red, 15 blue; 9 green, 10 blue, 1 red
+Game 94: 2 blue, 12 red, 10 green; 16 red, 9 blue, 6 green; 5 green, 9 blue, 11 red; 4 red, 2 blue
+Game 95: 2 green, 9 red, 1 blue; 2 blue, 1 red; 2 green, 5 blue, 3 red
+Game 96: 1 green, 5 red, 13 blue; 1 green, 2 red, 13 blue; 2 green, 2 red, 17 blue; 3 red, 1 green; 6 red, 2 green; 1 green, 7 blue, 4 red
+Game 97: 1 green, 1 red, 1 blue; 2 blue, 11 green; 1 blue, 13 green; 9 blue, 6 green, 1 red; 10 green, 8 blue
+Game 98: 12 green, 9 red; 12 green, 10 blue, 3 red; 3 red, 13 green, 7 blue
+Game 99: 8 green, 10 blue, 1 red; 10 green, 2 red, 6 blue; 3 green, 1 blue, 1 red; 10 blue, 1 red
+Game 100: 8 blue, 6 green, 8 red; 7 red, 2 blue; 2 red, 10 green, 10 blue; 9 green, 7 red; 3 red, 7 green, 1 blue
+`;
 
-const time = process.hrtime(startTime); // nanosecondes
-const resourceUsage = process.resourceUsage(startResourceUsage)
-const cpuUsage = 100 * 1000 * (resourceUsage.userCPUTime + resourceUsage.systemCPUTime) / (time[0] * 1e9 + time[1]);
+const options: WorkerOptions = {args: [entry], _dirname}
+useWorker('execute', options)
 
-console.log('cpuUsage', cpuUsage)
+// const options: WorkerOptions = {args: [12, 24], _dirname}
+// useWorker('add', options)
