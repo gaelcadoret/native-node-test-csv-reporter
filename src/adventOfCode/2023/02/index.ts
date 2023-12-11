@@ -34,37 +34,77 @@ const parseLines = (lines) => {
     });
 }
 
-const rules = {
-    red: 12,
-    green: 13,
-    blue: 14,
+const selectBiggerObject = (acc, el) => {
+    const accLen = Object.keys(acc).length;
+    const elLen = Object.keys(el).length;
+
+    if (accLen === elLen) {
+        return acc;
+    }
+
+    if (accLen > elLen) {
+        return acc;
+    }
+
+    return el;
+
 }
 
-const isValidSet = (set) => {
-    return Object.entries(set)
-        .every(
-            ([color, nb]) => {
-                return nb <= rules[color]
-            }
-        )
+/**
+ * { blue: 3, red: 4 }
+ * { red: 1, green: 2, blue: 6 }
+ *
+ * { blue: 6, red: 4, green: 2 }
+ * @param biggerObject
+ * @param el
+ */
+const overrideKeyForBiggerValue = (biggerObject, el) => {
+    const fusion = Object.entries(el).reduce((acc, el) => {
+        const [colorEl, nbEl] = el;
+
+        return {
+            ...acc,
+            [colorEl]: biggerObject?.[colorEl] > nbEl ? biggerObject?.[colorEl] : nbEl,
+        }
+    }, {})
+
+    return {
+        ...biggerObject,
+        ...fusion,
+    }
 }
 
-const isValidGame = (game) => {
-    return game.every(isValidSet)
+const getMinSetOfCubes = (game) => {
+
+    return game.reduce((acc, el) => {
+        const biggerObject = selectBiggerObject(acc, el);
+
+        const fusion = {
+            ...biggerObject,
+            ...overrideKeyForBiggerValue(acc, el),
+        };
+
+        return fusion
+    })
 }
 
 export const execute = (entry) => {
     const entryParsed = parseEntry(entry);
     const lines = parseLines(entryParsed);
     const validatedLines = lines
-        .filter((line) => {
+        .map((line) => {
             const [[_, value]] = Object.entries(line);
-            return isValidGame(value)
-        })
-        .map((game) => {
-            const [gameKey] = Object.keys(game);
-            return Number(gameKey.split(' ')[1]);
+            return getMinSetOfCubes(value)
         })
 
-    return validatedLines.reduce((acc, el) => { return acc + el; }, 0); //JSON.stringify(validatedLines, null, 2);
+    const powers = validatedLines
+        .map(
+            (set) => Object.values(set)
+                .reduce(
+                    (acc, el) => acc * el
+                )
+        )
+        .reduce((acc, el) => acc + el)
+
+    return JSON.stringify(powers, null, 2);
 }

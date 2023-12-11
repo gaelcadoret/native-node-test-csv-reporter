@@ -1,5 +1,5 @@
 import {parentPort, isMainThread} from 'node:worker_threads';
-import { execute } from "../../2023/02";
+import { execute } from "../../2023/03";
 
 const workerName = 'worker.generic-01';
 

@@ -19,6 +19,9 @@ export const isArray = (val) => Array.isArray(val);
 export const isObject = (val) => !Array.isArray(val) && typeof val === 'object'
 export const startsWith = (str) => (val) => val.startsWith(str);
 
+export const isNotNumber = (val) => /\D/.test(val);
+export const isNumber = (val) => /\d/.test(val);
+
 export const contentParser = pipe(
     trim,
     splitByDoubleCarriageReturn,
