@@ -46,6 +46,29 @@ export const createRanges = (arrSize, batchSize) => {
         [getStartOfRange(idx, batchSize), getEndOfRange(idx, batchSize)])
 }
 
+export const directions = [
+    { dx: 0, dy: -1, direction: 'up' }, // up
+    { dx: 0, dy: 1, direction: 'down' },  // down
+    { dx: -1, dy: 0, direction: 'left' }, // left
+    { dx: 1, dy: 0, direction: 'right' },  // right
+];
+export type DirectionWithDiagonal = {
+    dx: number,
+    dy: number,
+    direction: string,
+}
+export type DirectionWithDiagonals = DirectionWithDiagonal[];
+export const directionsWithDiagonals: DirectionWithDiagonals = [
+    { dx: 0, dy: -1, direction: 'up' }, // up
+    { dx: 0, dy: 1, direction: 'down' },  // down
+    { dx: -1, dy: 0, direction: 'left' }, // left
+    { dx: 1, dy: 0, direction: 'right' },  // right
+    { dx: -1, dy: -1, direction: 'top-left' }, // top-left
+    { dx: -1, dy: 1, direction: 'top-right' },  // top-right
+    { dx: 1, dy: -1, direction: 'bottom-left' },  // bottom-left
+    { dx: 1, dy: 1, direction: 'bottom-right' },   // bottom-right
+];
+
 const pickNumbers = (line) => {
     const regex = /\d/g;
     return line.match(regex);
