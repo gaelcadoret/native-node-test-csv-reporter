@@ -21,6 +21,15 @@ export const startsWith = (str) => (val) => val.startsWith(str);
 
 export const isNotNumber = (val) => /\D/.test(val);
 export const isNumber = (val) => /\d/.test(val);
+export const isSymbol = (val) => isNotNumber(val)
+    && typeof val === 'string'
+    && val !== '.';
+
+export const isSymbolGeneric = (symbol) => (val) => isNotNumber(val)
+    && typeof val === 'string'
+    && val !== '.';
+
+export const isSymbolStar = isSymbolGeneric('*');
 
 export const contentParser = pipe(
     trim,
@@ -97,7 +106,7 @@ export const useWorker = (fn, options) => {
             worker.postMessage({
                 origin: 'main',
                 type: 'timeout.start',
-                timeout: 10000,
+                timeout: 3000,
                 timestamp: new Date(Date.now()).toISOString()
             })
         }
