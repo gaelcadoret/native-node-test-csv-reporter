@@ -1,6 +1,7 @@
-const map = (fn) => (arr) => arr.map(fn)
+const map = (fn: Function) => <T>(arr: T[]): T[] => arr.map(fn)
 
-const reduce = (fn, arr, initialValue) => arr.reduce(fn, initialValue)
+type Universal = string | number | object | undefined
+const reduce = <T>(fn: Function, arr: T[], initialValue: Universal) => arr.reduce(fn, initialValue)
 
 const keyDataReducer = (obj) => (acc, key, idx) => {
     return {
@@ -11,8 +12,8 @@ const keyDataReducer = (obj) => (acc, key, idx) => {
     }
 }
 
-const groupBy = (fn) => {
-    const keys = map(fn)
+const groupBy = (fn: Function) => {
+    const keys = map<string>(fn)
     return (obj) => {
         return reduce(
             keyDataReducer(obj),

@@ -99,7 +99,7 @@ const charactersStrength = {
 
 const entries = (obj) => Object.entries(obj)
 
-const groupByStrength = groupBy((character) => {
+const groupByStrength = groupBy((character: [string, number]) => {
     const [characterName, strength] = character;
 
     if (strength <= 50) {
@@ -113,11 +113,17 @@ const groupByStrength = groupBy((character) => {
     }
     return 'warlords'
 })
+const log = (data) => {
+    console.log('data', data)
+    return data;
+}
 const createClassification = pipe(
     entries, // R.toPairs is equivalent to Object.entries
+    log,
     groupByStrength,
 )
-// const result = createClassification(charactersStrength)
+// const result1 = createClassification(charactersStrength)
+// console.log('result1', result1)
 
 
 const cars = [
@@ -196,15 +202,52 @@ const cars = [
 ]
 
 const groupByBrand = groupBy((car) => car.brand)
-const createClassificationByPower = groupBy((car) => {
-    const {power} = car;
-    if (power <= 100) {
-        return 'low'
-    }
-    if (power <= 120) {
-        return 'medium'
-    }
-    return 'high'
-})
-const result = createClassificationByPower(cars)
-console.log('result', result);
+// const createClassificationByPower = groupBy((car) => {
+//     const {power} = car;
+//     if (power <= 100) {
+//         return 'low'
+//     }
+//     if (power <= 120) {
+//         return 'medium'
+//     }
+//     return 'high'
+// })
+// const result = createClassificationByPower(cars)
+// console.log('result', result);
+
+const map = (fn: Function) => <T>(arr: T[]): T[] => arr.map(fn)
+type User = {
+    name: string;
+    age: number;
+}
+type Users = User[]
+const users: Users = [
+    {
+        name: 'John',
+        age: 20,
+    },
+    {
+        name: 'Jane',
+        age: 20,
+    },
+    {
+        name: 'Fred',
+        age: 30,
+    },
+    {
+        name: 'Bob',
+        age: 30,
+    },
+    {
+        name: 'Alice',
+        age: 40,
+    },
+    {
+        name: 'Dora',
+        age: 40,
+    },
+]
+
+const test = map((user) => user.name)
+const result2 = test<string>(users)
+console.log('test', result2.map((name) => name.toUpperCase()))
