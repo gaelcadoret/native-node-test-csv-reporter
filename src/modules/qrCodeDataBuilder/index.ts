@@ -1,4 +1,4 @@
-import {pipe} from "ramda";
+import {isEmpty, pipe} from "ramda";
 import {DateTime} from "luxon";
 
 type QrCode = {
@@ -11,7 +11,7 @@ type QrCode = {
     childs?: string[];
     parent?: string;
     numberPackage?: number;
-}
+} | {}
 
 type Trim = (str: string) => string
 type ToLowerCase = (str: string) => string
@@ -21,9 +21,13 @@ const CODE_BOX = '00'
 const CODE_PALET = '01'
 const CODE_CONTAINER = '02'
 
-const trim: Trim = (str) => str.trim()
+const trim: Trim = (str) => typeof str === 'string'
+    ? str.trim()
+    : str
 
-const toLowerCase: ToLowerCase = (str) => str.toLowerCase()
+const toLowerCase: ToLowerCase = (str) => typeof str === 'string'
+    ? str.toLowerCase()
+    : str
 
 const formatString = pipe(trim, toLowerCase)
 
@@ -62,7 +66,9 @@ const findParent = (aggregationNodes, sscc): string => {
 }
 
 const extractGtin = (epcValue): string => epcValue.split(":")[epcValue.split(":").length - 1]
-const getChildren = (boxData): string[] => boxData.childEPCs.parentID.map(extractGtin)
+const getChildren = (boxData): string[] => Object.hasOwn(boxData.childEPCs, 'parentID')
+    ? boxData.childEPCs.parentID.map(extractGtin)
+    : []
 
 const throwError = (msg) => {
     throw new Error(msg)
@@ -90,7 +96,17 @@ const getExpirationDate = ({Lifetime, LifetimeType}, eventTime): string => {
 
 const withField: WithField = (key, val) => (obj) => ({...obj, [key]: val})
 
+const validateRecord = (record) => {
+    if (!Object.hasOwn(record, 'Pallet GTIN or SSCC18')) throwError('Missing mandatory property "Pallet GTIN or SSCC18" in record!')
+    if (!Object.hasOwn(record, 'LifetimeType')) throwError('Missing mandatory property "LifetimeType" in record!')
+    if (!Object.hasOwn(record, 'Lifetime')) throwError('Missing mandatory property "Lifetime" in record!')
+}
+
 const buildQRCodeData = (record, aggregationNodes): QrCode => {
+    if (isEmpty(record) || isEmpty(aggregationNodes)) return {}
+
+    validateRecord(record)
+
     const gtin = record['Pallet GTIN or SSCC18']
 
     const gtinData = findNodeByGtin(aggregationNodes, gtin)

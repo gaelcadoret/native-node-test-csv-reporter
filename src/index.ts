@@ -2,7 +2,7 @@ import parseXmlContent from "./modules/utils/parseXmlContent";
 
 import fs from "fs";
 import parseCsvContent from "./modules/utils/parseCsvContent";
-import buildQRCodeData from "./modules/qrCode";
+import buildQRCodeData from "./modules/qrCodeDataBuilder";
 
 const XML_ROOT_TAG = 'epcis:EPCISDocument'
 const XML_ROOT_TAG_2 = 'EPCISDocument'
