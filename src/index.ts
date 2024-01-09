@@ -2,7 +2,7 @@ import parseXmlContent from "./modules/utils/parseXmlContent";
 
 import fs from "fs";
 import parseCsvContent from "./modules/utils/parseCsvContent";
-import buildQRCodeData from "./modules/qrCodeDataBuilder";
+import qrCodeDataBuilder from "./modules/qrCodeDataBuilder";
 
 const XML_ROOT_TAG = 'epcis:EPCISDocument'
 const XML_ROOT_TAG_2 = 'EPCISDocument'
@@ -22,7 +22,8 @@ const XML_ROOT_TAG_2 = 'EPCISDocument'
     const aggregationNodes = jsonFromXml[XML_ROOT_TAG]['EPCISBody']['EventList']['AggregationEvent']
     const record = csvContent[0]
 
-    const qrCodeData = buildQRCodeData(record, aggregationNodes)
+
+    const qrCodeData = qrCodeDataBuilder(record, aggregationNodes)
 
     console.log('qrCodeData', qrCodeData)
 })();
