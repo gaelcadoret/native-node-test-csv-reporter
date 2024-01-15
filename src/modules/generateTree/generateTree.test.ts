@@ -6,6 +6,7 @@ import generateTree from "./";
 
 describe('buildTreeRecursive', () => {
     it('should generate a json tree from flat array', () => {
+        // Given
         const data = [
             {
                 aliment: 'Fruits',
@@ -57,8 +58,12 @@ describe('buildTreeRecursive', () => {
                 prix: '6.50€'
             }
         ]
+
+        // When
         const keysDepth = ['aliment', 'sousAliment', 'sousAliment2']
         const jsonTree = generateTree(data, keysDepth)
+
+        // Then
         const expectedResult = {
             'Fruits': {
                 'Pomme': {
@@ -126,6 +131,7 @@ describe('buildTreeRecursive', () => {
     })
 
     it('should generate a json tree from flat array', () => {
+        // Given
         const data = [
             {
                 ProductId: '910254',
@@ -1481,9 +1487,13 @@ describe('buildTreeRecursive', () => {
                 'Production site ': 'Bioglan, Malmoe'
             }
         ]
+
+        // When
         const keysDepth = ['Generic Name', 'ProductName', 'Product form', 'Strength', 'Major Country']
+
         const jsonTree = generateTree(data, keysDepth)
-        console.log(JSON.stringify(jsonTree, null, 2))
+
+        // Then
         const expectedResult = {
             "Mometasone furoate": {
                 "Ovixan 1 mg/g\nkräm/krem/emulsiovoide": {
@@ -2044,6 +2054,7 @@ describe('buildTreeRecursive', () => {
                 }
             }
         }
+
         assert.deepStrictEqual(jsonTree, expectedResult)
     })
 })

@@ -1,35 +1,28 @@
-const generateTree = (data, keysDepth) => {
-    const buildTreeRecursive = (tree, levels, data) => {
-        if (!data) {
-            return;  // Arrêtez la fonction si les données sont undefined
-        }
+const buildTreeRecursive = (tree, levels, data) => {
+    if (!data) return tree;
 
-        const [currentLevel, ...remainingLevels] = levels;
-        const value = (data[currentLevel] || '').trim();  // Assurez-vous que la propriété existe avant d'appeler trim()
+    const [currentLevel, ...remainingLevels] = levels;
+    const value = (data[currentLevel] || '').trim();
 
-        if (value !== '') {
-            if (!tree[value]) {
-                tree[value] = {};
-            }
+    if (value !== '') {
+        const subtree = tree[value] || {};
 
-            if (remainingLevels.length === 0) {
-                // Si c'est le niveau le plus profond, stockez le contenu des autres colonnes
-                tree[value] = { ...data };
-            } else {
-                buildTreeRecursive(tree[value], remainingLevels, data);
-            }
-        }
-    };
+        const updatedSubtree = remainingLevels.length === 0
+            ? { ...data }
+            : buildTreeRecursive(subtree, remainingLevels, data);
 
-    // Initialiser la structure de l'arbre
-    const tree = {};
-
-    // Itérer sur chaque ligne du tableau JSON
-    data.forEach(dataItem => {
-        buildTreeRecursive(tree, keysDepth, dataItem);
-    });
+        return {
+            ...tree,
+            [value]: updatedSubtree,
+        };
+    }
 
     return tree;
 };
+
+const reducer = (keysDepth) => (accTree, dataItem) => buildTreeRecursive(accTree, keysDepth, dataItem)
+
+const generateTree = (data, keysDepth) =>
+    data.reduce(reducer(keysDepth), {});
 
 export default generateTree;
