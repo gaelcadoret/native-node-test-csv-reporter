@@ -2,10 +2,12 @@ import parseXmlContent from "./modules/utils/parseXmlContent";
 
 import fs from "fs";
 import parseCsvContent from "./modules/utils/parseCsvContent";
-import qrCodeDataBuilder from "./modules/qrCodeDataBuilder";
+import qrCodeBuilder from "./modules/qrCodeDataBuilder";
 
 const XML_ROOT_TAG = 'epcis:EPCISDocument'
 const XML_ROOT_TAG_2 = 'EPCISDocument'
+
+
 
 /**
  * Generate QRCode data to be encrypt
@@ -21,9 +23,16 @@ const XML_ROOT_TAG_2 = 'EPCISDocument'
 
     const aggregationNodes = jsonFromXml[XML_ROOT_TAG]['EPCISBody']['EventList']['AggregationEvent']
     const record = csvContent[0]
+    // record['Pallet GTIN or SSCC18'] = '027788778.11111111111'
+    // record['Pallet GTIN or SSCC18'] = '004456788.99994395400'
 
+    console.log('aggregationNodes.length', aggregationNodes.length)
 
-    const qrCodeData = qrCodeDataBuilder(record, aggregationNodes)
+    console.log(JSON.stringify(record, null, 2))
 
-    console.log('qrCodeData', qrCodeData)
+    const qrCodePipeline = qrCodeBuilder(record)
+
+    const qrCodeData = qrCodePipeline(aggregationNodes)
+
+    console.log('qrCodeData', JSON.stringify(qrCodeData, null, 2))
 })();

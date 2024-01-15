@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.ts",
-    "node": "node --loader tsx --no-warnings src/index.ts",
+    "node": "node --loader tsx --no-warnings src/qrCodeBuilderPlayground.ts",
+    "node1": "node --loader tsx --no-warnings src/generateTree.ts",
     "fp": "node --loader tsx --no-warnings src/fp.ts",
     "ad": "node --loader tsx --no-warnings src/adventOfCode/2023/index.ts",
     "test": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test\" \"./src/**/*.test.ts\"",

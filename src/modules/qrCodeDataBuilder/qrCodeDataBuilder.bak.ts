@@ -1,12 +1,16 @@
-import {describe, it, mock} from "node:test";
+import {describe, it} from "node:test";
 import assert from "node:assert";
 
-import buildQRCodeData from "./";
+import qrCodeBuilder from "./";
 
 describe('qrCodeDataBuilder', () => {
     it('should return empty object if empty object in arguments', () => {
-        const result = buildQRCodeData({}, {})
-        assert.deepStrictEqual(result, {})
+        const qrCodePipeline = qrCodeBuilder({})
+        const expectedResult = {
+            name: 'MyVeriMed',
+            data: {}
+        }
+        assert.deepStrictEqual(qrCodePipeline({}), expectedResult)
     })
 
     it('should throw an error if mandatory gtin field is missing', () => {
@@ -24,7 +28,7 @@ describe('qrCodeDataBuilder', () => {
         ]
 
         assert.throws(() => {
-            buildQRCodeData(gtinRecord, aggregationNodes)
+            qrCodeBuilder(gtinRecord)(aggregationNodes)
         }, new Error('Missing mandatory property "Pallet GTIN or SSCC18" in record!'))
     })
 
@@ -44,7 +48,7 @@ describe('qrCodeDataBuilder', () => {
         ]
 
         assert.throws(() => {
-            buildQRCodeData(gtinRecord, aggregationNodes)
+            qrCodeBuilder(gtinRecord)(aggregationNodes)
         }, new Error('Missing mandatory property "LifetimeType" in record!'))
     })
 
@@ -64,7 +68,7 @@ describe('qrCodeDataBuilder', () => {
         ]
 
         assert.throws(() => {
-            buildQRCodeData(gtinRecord, aggregationNodes)
+            qrCodeBuilder(gtinRecord)(aggregationNodes)
         }, new Error('Missing mandatory property "Lifetime" in record!'))
     })
 
@@ -84,18 +88,21 @@ describe('qrCodeDataBuilder', () => {
                 action: 'ADD'
             }
         ]
-        const result = buildQRCodeData(gtinRecord, aggregationNodes)
+        const result = qrCodeBuilder(gtinRecord)(aggregationNodes)
 
         const expectedResult = {
-            sscc: '004456788.99994395409',
-            expireDate: '2024-01-07',
-            from: 'from',
-            destination: 'destination',
-            deliveryDate: 'deliveryDate',
-            expectedDeliveryDate: 'expectedDeliveryDate',
-            childs: [],
-            parent: '',
-            numberPackage: 0,
+            name: 'MyVeriMed',
+            data: {
+                sscc: '004456788.99994395409',
+                expireDate: '2024-01-07',
+                from: 'from',
+                destination: 'destination',
+                deliveryDate: 'deliveryDate',
+                expectedDeliveryDate: 'expectedDeliveryDate',
+                childs: [],
+                parent: '',
+                numberPackage: 0,
+            }
         }
         assert.deepStrictEqual(result, expectedResult)
     })
@@ -132,7 +139,7 @@ describe('qrCodeDataBuilder', () => {
         ]
 
         assert.throws(() => {
-            buildQRCodeData(gtinRecord, aggregationNodes)
+            qrCodeBuilder(gtinRecord)(aggregationNodes)
         }, new Error('Invalid key for lifeTimeType value => month'))
     })
 
@@ -166,21 +173,24 @@ describe('qrCodeDataBuilder', () => {
                 action: 'ADD'
             }
         ]
-        const result = buildQRCodeData(gtinRecord, aggregationNodes)
+        const result = qrCodeBuilder(gtinRecord)(aggregationNodes)
 
         const expectedResult = {
-            sscc: '015544567.55577798990',
-            expireDate: '2027-01-05',
-            from: 'from',
-            destination: 'destination',
-            deliveryDate: 'deliveryDate',
-            expectedDeliveryDate: 'expectedDeliveryDate',
-            childs: [
-                '004456788.99994395400',
-                '004456788.99994395401',
-            ],
-            parent: '027788778.11111111111',
-            numberPackage: 2,
+            name: 'MyVeriMed',
+            data: {
+                sscc: '015544567.55577798990',
+                expireDate: '2027-01-05',
+                from: 'from',
+                destination: 'destination',
+                deliveryDate: 'deliveryDate',
+                expectedDeliveryDate: 'expectedDeliveryDate',
+                childs: [
+                    '004456788.99994395400',
+                    '004456788.99994395401',
+                ],
+                parent: '027788778.11111111111',
+                numberPackage: 2,
+            }
         }
         assert.deepStrictEqual(result, expectedResult)
     })
