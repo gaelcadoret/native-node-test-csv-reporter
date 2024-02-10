@@ -8,6 +8,7 @@
     "start": "node src/index.ts",
     "node": "node --loader tsx --no-warnings src/qrCodeBuilderPlayground.ts",
     "node1": "node --loader tsx --no-warnings src/generateTree.ts",
+    "node2": "node --loader tsx --no-warnings src/redisConnection.ts",
     "fp": "node --loader tsx --no-warnings src/fp.ts",
     "ad": "node --loader tsx --no-warnings src/adventOfCode/2023/index.ts",
     "test": "NODE_ENV=test glob -c \"node --loader tsx --no-warnings --test\" \"./src/**/*.test.ts\"",
@@ -30,6 +31,7 @@
     "error-stack-parser": "^2.1.4",
     "node-test-parser": "github:nearform/node-test-parser#v2.0.4",
     "prompts": "^2.4.2",
+    "redis": "^4.6.12",
     "stack-utils": "^2.0.6"
   },
   "devDependencies": {
